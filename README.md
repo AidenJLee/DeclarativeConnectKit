@@ -72,31 +72,29 @@ Handle network request errors using the `NetworkRequestError` enumeration. Each 
 
 Here is a description of each error status:
 
-invalidRequest: This error occurs when the client sends an incorrect request. For example, this error can occur if parameters required for the request are missing or the request format is incorrect.
+- invalidRequest: This error occurs when the client sends an incorrect request. For example, this error can occur if parameters required for the request are missing or the request format is incorrect.
 
-badRequest: This error occurs when the server cannot understand the client's request. For example, this error can occur if the syntax of the request is incorrect or the request contains invalid data.
+- badRequest: This error occurs when the server cannot understand the client's request. For example, this error can occur if the syntax of the request is incorrect or the request contains invalid data.
 
-unauthorized: This error occurs when the client is not authenticated. For example, this error can occur if the client provides incorrect credentials or does not provide any credentials at all.
+- unauthorized: This error occurs when the client is not authenticated. For example, this error can occur if the client provides incorrect credentials or does not provide any credentials at all.
 
-forbidden: This error occurs when the client does not have permission for the requested resource. This error can occur if the client is authenticated but does not have permission to access the resource.
+- forbidden: This error occurs when the client does not have permission for the requested resource. This error can occur if the client is authenticated but does not have permission to access the resource.
 
-notFound: This error occurs when the server cannot find the resource requested by the client. For example, this error can occur if the URL requested by the client does not exist.
+- notFound: This error occurs when the server cannot find the resource requested by the client. For example, this error can occur if the URL requested by the client does not exist.
 
-error4xx: This error represents a 4xx HTTP status code indicating that the client's request is incorrect. This category includes badRequest, unauthorized, forbidden, notFound, etc. described above.
+- error4xx: This error represents a 4xx HTTP status code indicating that the client's request is incorrect. This category includes badRequest, unauthorized, forbidden, notFound, etc. described above.
 
-serverError: This error indicates that there was a problem on the server. This error can occur if an unexpected error occurs while the
+- serverError: This error indicates that there was a problem on the server. This error can occur if an unexpected error occurs while the server is processing the request.
 
-server is processing the request.
+- serviceError: This error indicates that there was a service-related problem on the server. For example, this error can occur if there is a problem with the server's database.
 
-serviceError: This error indicates that there was a service-related problem on the server. For example, this error can occur if there is a problem with the server's database.
+- error5xx: This error represents a 5xx HTTP status code indicating that there was a problem on the server. This category includes serverError, serviceError, etc. described above.
 
-error5xx: This error represents a 5xx HTTP status code indicating that there was a problem on the server. This category includes serverError, serviceError, etc. described above.
+- decodingError: This error indicates that there was a problem decoding the data. For example, this error can occur if there is a problem converting the response from the server into a format that the app can understand.
 
-decodingError: This error indicates that there was a problem decoding the data. For example, this error can occur if there is a problem converting the response from the server into a format that the app can understand.
+- urlSessionFailed: This error indicates that the URL session operation failed. For example, this error can occur if the URL session operation is not completed due to network connection problems or other system-level problems.
 
-urlSessionFailed: This error indicates that the URL session operation failed. For example, this error can occur if the URL session operation is not completed due to network connection problems or other system-level problems.
-
-unknownError: This error indicates that an unknown error has occurred. This error generally occurs in unexpected situations or unhandled exception situations.
+- unknownError: This error indicates that an unknown error has occurred. This error generally occurs in unexpected situations or unhandled exception situations.
 
 
 ## Logging
@@ -190,29 +188,29 @@ let response: MyResponse = try await declarativeConnectKit.dispatch(myRequest)
 
 각 에러 상태에 대한 설명은 다음과 같습니다:
 
-invalidRequest: 이 에러는 클라이언트가 잘못된 요청을 보냈을 때 발생합니다. 예를 들어, 요청에 필요한 매개변수가 누락되었거나, 요청 형식이 잘못된 경우에 이 에러가 발생할 수 있습니다.
+- invalidRequest: 이 에러는 클라이언트가 잘못된 요청을 보냈을 때 발생합니다. 예를 들어, 요청에 필요한 매개변수가 누락되었거나, 요청 형식이 잘못된 경우에 이 에러가 발생할 수 있습니다.
 
-badRequest: 이 에러는 서버가 클라이언트의 요청을 이해할 수 없을 때 발생합니다. 예를 들어, 요청의 구문이 잘못되었거나, 요청에 유효하지 않은 데이터가 포함되어 있는 경우에 이 에러가 발생할 수 있습니다.
+- badRequest: 이 에러는 서버가 클라이언트의 요청을 이해할 수 없을 때 발생합니다. 예를 들어, 요청의 구문이 잘못되었거나, 요청에 유효하지 않은 데이터가 포함되어 있는 경우에 이 에러가 발생할 수 있습니다.
 
-unauthorized: 이 에러는 클라이언트가 인증되지 않았을 때 발생합니다. 예를 들어, 클라이언트가 잘못된 자격 증명을 제공하거나, 자격 증명을 전혀 제공하지 않은 경우에 이 에러가 발생할 수 있습니다.
+- unauthorized: 이 에러는 클라이언트가 인증되지 않았을 때 발생합니다. 예를 들어, 클라이언트가 잘못된 자격 증명을 제공하거나, 자격 증명을 전혀 제공하지 않은 경우에 이 에러가 발생할 수 있습니다.
 
-forbidden: 이 에러는 클라이언트가 요청한 리소스에 대한 권한이 없을 때 발생합니다. 클라이언트가 인증되었지만, 해당 리소스에 접근할 권한이 없는 경우에 이 에러가 발생할 수 있습니다.
+- forbidden: 이 에러는 클라이언트가 요청한 리소스에 대한 권한이 없을 때 발생합니다. 클라이언트가 인증되었지만, 해당 리소스에 접근할 권한이 없는 경우에 이 에러가 발생할 수 있습니다.
 
-notFound: 이 에러는 클라이언트가 요청한 리소스를 서버에서 찾을 수 없을 때 발생합니다. 예를 들어, 클라이언트가 요청한 URL이 존재하지 않는 경우에 이 에러가 발생할 수 있습니다.
+- notFound: 이 에러는 클라이언트가 요청한 리소스를 서버에서 찾을 수 없을 때 발생합니다. 예를 들어, 클라이언트가 요청한 URL이 존재하지 않는 경우에 이 에러가 발생할 수 있습니다.
 
-error4xx: 이 에러는 클라이언트의 요청이 잘못되었음을 나타내는 4xx HTTP 상태 코드를 나타냅니다. 이 범주에는 위에서 설명한 badRequest, unauthorized, forbidden, notFound 등이 포함됩니다.
+- error4xx: 이 에러는 클라이언트의 요청이 잘못되었음을 나타내는 4xx HTTP 상태 코드를 나타냅니다. 이 범주에는 위에서 설명한 badRequest, unauthorized, forbidden, notFound 등이 포함됩니다.
 
-serverError: 이 에러는 서버에서 문제가 발생했음을 나타냅니다. 서버가 요청을 처리하는 도중에 예상치 못한 오류가 발생한 경우에 이 에러가 발생할 수 있습니다.
+- serverError: 이 에러는 서버에서 문제가 발생했음을 나타냅니다. 서버가 요청을 처리하는 도중에 예상치 못한 오류가 발생한 경우에 이 에러가 발생할 수 있습니다.
 
-serviceError: 이 에러는 서버에서 서비스 관련 문제가 발생했음을 나타냅니다. 예를 들어, 서버의 데이터베이스에 문제가 발생한 경우에 이 에러가 발생할 수 있습니다.
+- serviceError: 이 에러는 서버에서 서비스 관련 문제가 발생했음을 나타냅니다. 예를 들어, 서버의 데이터베이스에 문제가 발생한 경우에 이 에러가 발생할 수 있습니다.
 
-error5xx: 이 에러는 서버에서 문제가 발생했음을 나타내는 5xx HTTP 상태 코드를 나타냅니다. 이 범주에는 위에서 설명한 serverError, serviceError 등이 포함됩니다.
+- error5xx: 이 에러는 서버에서 문제가 발생했음을 나타내는 5xx HTTP 상태 코드를 나타냅니다. 이 범주에는 위에서 설명한 serverError, serviceError 등이 포함됩니다.
 
-decodingError: 이 에러는 데이터를 디코딩하는 도중에 문제가 발생했음을 나타냅니다. 예를 들어, 서버에서 받은 응답을 앱이 이해할 수 있는 형식으로 변환하는 도중에 문제가 발생한 경우에 이 에러가 발생할 수 있습니다.
+- decodingError: 이 에러는 데이터를 디코딩하는 도중에 문제가 발생했음을 나타냅니다. 예를 들어, 서버에서 받은 응답을 앱이 이해할 수 있는 형식으로 변환하는 도중에 문제가 발생한 경우에 이 에러가 발생할 수 있습니다.
 
-urlSessionFailed: 이 에러는 URL 세션 작업이 실패했음을 나타냅니다. 예를 들어, 네트워크 연결 문제나 기타 시스템 수준의 문제로 인해 URL 세션 작업이 완료되지 않은 경우에 이 에러가 발생할 수 있습니다.
+- urlSessionFailed: 이 에러는 URL 세션 작업이 실패했음을 나타냅니다. 예를 들어, 네트워크 연결 문제나 기타 시스템 수준의 문제로 인해 URL 세션 작업이 완료되지 않은 경우에 이 에러가 발생할 수 있습니다.
 
-unknownError: 이 에러는 알 수 없는 오류가 발생했음을 나타냅니다. 이 에러는 일반적으로 예상치 못한 상황이나 처리되지 않은 예외 상황에서 발생합니다.
+- unknownError: 이 에러는 알 수 없는 오류가 발생했음을 나타냅니다. 이 에러는 일반적으로 예상치 못한 상황이나 처리되지 않은 예외 상황에서 발생합니다.
 
 
 ## 로깅
