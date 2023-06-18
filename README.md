@@ -1,5 +1,11 @@
 # DeclarativeConnectKit
 
+ UI영역에서 SwiftUI로 변경하면서 선언적 형태로 프로젝트가 변경 되는 과정에서 동질성을 위하여 네트워크 부분도 선언적 형태로 만들어 보았다.
+
+ 전송 형태 부터 방식, 내용을 선언하고 네트워크 서비스에 dispatch하면 결과를 Combine또는 async/await 형태로 반환 한다.
+
+ UI도 NETWORK도 선언형으로 사용자는 그저 필요한 것을 선언할 뿐.  Thats all!
+
 DeclarativeConnectKit is a networking library written in a declarative manner (like SwiftUI). This library is written in Swift and handles network requests using Combine and the new async/await pattern in Swift 5.5.
 
 ## Requirements
