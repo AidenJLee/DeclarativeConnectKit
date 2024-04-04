@@ -6,7 +6,12 @@
 
  UI도 NETWORK도 선언형으로 사용자는 그저 필요한 것을 선언할 뿐.  Thats all!
 
+## Overview
+
+DeclarativeConnectKit is a Swift library designed to simplify network requests with a declarative approach. It leverages Combine and async/await functionalities for efficient and concise networking code.
+
 DeclarativeConnectKit is a networking library written in a declarative manner (like SwiftUI). This library is written in Swift and handles network requests using Combine and the new async/await pattern in Swift 5.5.
+
 
 ## Requirements
 
@@ -14,28 +19,18 @@ DeclarativeConnectKit is a networking library written in a declarative manner (l
 - macOS 10.15 or later
 - Swift 5.5 or later
 
-## Key Features
 
-- Supports HTTP methods (GET, POST, PUT, DELETE, etc.)
-- Supports JSON, URL Encoded, Multipart forms of HTTP Body
-- Configurable HTTP Header
-- Configurable Query Parameter
-- Able to transmit Multipart Data
-- Configurable authentication token
-- Configurable JSON Decoder
-- Network request logging feature
+## Features
 
-## Usage
+Declarative API: Define your requests in a clear and concise manner using the DCRequest protocol.
+Combine & Async/Await Support: Choose between using Combine publishers or async/await syntax for network calls.
+Type Safety: Benefit from type safety with Codable models for request and response data.
+Error Handling: Handle various network errors through the NetworkRequestError enum.
+Logging: Utilize the built-in DCLogger for logging request and response details.
+URLRequest to cURL Conversion: Easily convert URLRequests to cURL commands for debugging and sharing.
 
-### Initialization
 
-Create with baseURL included
-
-```swift
-let declarativeConnectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
-```
-
-### Implementation
+## Implementation
 
 Explicitly create the network function you want to use with a struct along with the DCRequest Protocol.
 
@@ -54,22 +49,162 @@ struct MyRequest: DCRequest {
 }
 ```
 
-### Use
+## Usage
 
-Create a Combine publisher by putting the implemented struct, and you can receive the network result value.
+### Installation
+
+Swift Package Manager: Add the following to your Package.swift file:
+dependencies: [
+    .package(url: "https://github.com/your-username/DeclarativeConnectKit.git", .upToNextMajor(from: "1.0.0"))
+]
+
+Manually: Download the source files and include them in your project.
+
+
+### Defining Requests
+
+Create a struct conforming to the DCRequest protocol:
 
 ```swift
-let myRequest = MyRequest()
-let publisher: AnyPublisher<MyResponse, NetworkRequestError> = declarativeConnectKit.dispatch(myRequest)
+struct GetUsersRequest: DCRequest {
+    typealias ReturnType = [User]
+    
+    var path: String = "/users"
+}
 ```
 
-Or you can use the async/await pattern. This method is recommended when used with SwiftUI.
+(Optional) Customize request properties:
 
 ```swift
-let myRequest = MyRequest()
-let response: MyResponse = try await declarativeConnectKit.dispatch(myRequest)
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var body: Params = ["title": "My Post", "content": "Hello world!"]
+}
+
+
+or 
+
+struct BodyParam: Encodable, CustomStringConvertible {
+	let title: String
+	let content: String
+
+	var description: String {
+		return "title: \(title), content: \(content)"
+	}
+}
+
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var body: Params = BodyParam(title: "My Post", content: "Hello, World").asParams()
+}
+
+
 ```
 
+### Making Requests
+
+#### Using Combine
+Create a DeclarativeConnectKit instance with your base URL:
+
+```swift
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+```
+
+Use the dispatch method with your request:
+```swift
+connectKit.dispatch(GetUsersRequest())
+    .sink(receiveCompletion: { completion in
+        // Handle completion (finished or failed)
+    }, receiveValue: { users in
+        // Process the received users
+    })
+    .store(in: &cancellables)
+```
+
+#### Using Async/Await
+Use the async dispatch method:
+```swift
+do {
+    let users = try await connectKit.dispatch(GetUsersRequest())
+    // Process the received users
+} catch {
+    // Handle errors
+}
+```
+
+#### Logging
+The DCLogger automatically logs requests and responses based on the configured log level. You can adjust the log level in the DeclarativeConnectKit initializer:
+
+```swift
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+connectKit.logger.logLevel = .debug // Set log level to debug
+```
+
+## Example
+
+Here's a more complete example demonstrating how to fetch a list of users and create a new post:
+
+```swift
+// User model
+struct User: Codable {
+    let id: Int
+    let name: String
+}
+
+// Post model
+struct Post: Codable {
+    let id: Int
+    let title: String
+    let content: String
+}
+
+// Get users request
+struct GetUsersRequest: DCRequest {
+    typealias ReturnType = [User]
+    
+    var path: String = "/users"
+}
+
+// Create post request
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var body: Params
+    
+    init(title: String, content: String) {
+        self.body = ["title": title, "content": content]
+    }
+}
+
+// Usage
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+
+// Fetch users using Combine
+connectKit.dispatch(GetUsersRequest())
+    .sink(receiveCompletion: { completion in
+        // Handle completion
+    }, receiveValue: { users in
+        // Process users
+        print("Received users: \(users)")
+    })
+    .store(in: &cancellables)
+
+// Create a post using async/await
+do {
+    let newPost = try await connectKit.dispatch(CreatePostRequest(title: "New Post", content: "This is a new post!"))
+    print("Created post: \(newPost)")
+} catch {
+    print("Error creating post: \(error)")
+}
+```
 
 
 ## Error Handling
@@ -103,25 +238,20 @@ Here is a description of each error status:
 - unknownError: This error indicates that an unknown error has occurred. This error generally occurs in unexpected situations or unhandled exception situations.
 
 
-## Logging
-
-Use the `DCLogger` class to log network requests and responses. The logging level can be selected from `.off`, `.info`, `.debug`.
-
-In the public struct DCDispatcher, you need to put the level when initializing logging. The default setting is .info.
-
-```swift
-private let logger = DCLogger(logLevel: .info)
-```
-
-When you raise the level to .debug, you can see the command in curl form in the log.
-
-
 
 # DeclarativeConnectKit
 
-DeclarativeConnectKit는 선언적 형태로 작성된 네트워킹 라이브러리입니다. (like SwiftUI)
-이 라이브러리는 Swift로 작성되었으며 Combine과 Swift 5.5의 새로운 async/await 패턴을 사용하여 네트워크 요청을 처리합니다.
+UI 영역에서 SwiftUI로 변경되면서 프로젝트의 선언적 형태가 증가하는 과정에서 네트워크 부분도 선언적 형태로 만들어졌습니다. 
 
+전송 형태부터 방식, 내용을 선언하고 네트워크 서비스에 dispatch하면 결과를 Combine 또는 async/await 형태로 반환합니다. 
+
+UI와 NETWORK 모두 선언형으로 사용자는 필요한 것을 단순히 선언할 뿐입니다. 그게 전부입니다!
+
+## 개요
+
+DeclarativeConnectKit은 선언적 접근 방식으로 네트워크 요청을 간편하게 하는 Swift 라이브러리입니다. 효율적이고 간결한 네트워킹 코드를 위해 Combine과 async/await 기능을 활용합니다.
+
+DeclarativeConnectKit은 SwiftUI와 같이 선언적 형태로 작성된 네트워킹 라이브러리입니다. Swift로 작성되었으며 Combine 및 Swift 5.5의 새로운 async/await 패턴을 사용하여 네트워크 요청을 처리합니다.
 
 ## 요구 사항
 
@@ -129,31 +259,18 @@ DeclarativeConnectKit는 선언적 형태로 작성된 네트워킹 라이브러
 - macOS 10.15 이상
 - Swift 5.5 이상
 
+## 특징
 
-## 주요 기능
+- 선언적 API: DCRequest 프로토콜을 사용하여 요청을 명확하고 간결하게 정의합니다.
+- Combine 및 Async/Await 지원: 네트워크 호출에 Combine 퍼블리셔 또는 async/await 구문을 선택할 수 있습니다.
+- 타입 안전성: Codable 모델을 사용하여 요청 및 응답 데이터에 대한 타입 안전성을 제공합니다.
+- 오류 처리: NetworkRequestError 열거형을 통해 다양한 네트워크 오류를 처리합니다.
+- 로깅: 내장된 DCLogger를 사용하여 요청 및 응답 세부 정보를 로깅합니다.
+- URLRequest를 cURL로 변환: URLRequests를 디버깅 및 공유하기 위해 쉽게 cURL 명령으로 변환합니다.
 
-- HTTP 메소드(GET, POST, PUT, DELETE 등) 지원
-- JSON, URL Encoded, Multipart 형식의 HTTP Body 지원
-- HTTP Header 설정 가능
-- Query Parameter 설정 가능
-- Multipart Data 전송 가능
-- 인증 토큰 설정 가능
-- JSON Decoder 설정 가능
-- 네트워크 요청 로깅 기능
+## 구현
 
-## 사용 방법
-
-### 생성
-
-baseURL을 포함하여 생성
-
-```swift
-let declarativeConnectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
-```
-
-### 구현
-
-사용하고자 하는 네트워크 기능을 구조체를 이용하여 DCRequest Protocol과 함께 명시적으로 생성합니다.
+DCRequest 프로토콜과 함께 사용할 네트워크 함수를 명시적으로 만듭니다.
 
 ```swift
 struct MyRequest: DCRequest {
@@ -170,63 +287,189 @@ struct MyRequest: DCRequest {
 }
 ```
 
-### 사용
+## 사용 방법
 
-구현 한 구조체를 담아 Combine publisher을 생성하면 네트워크 결과 값을 받을 수 있습니다.
+### 설치
 
+Swift Package Manager: Package.swift 파일에 다음을 추가합니다:
 ```swift
-let myRequest = MyRequest()
-let publisher: AnyPublisher<MyResponse, NetworkRequestError> = declarativeConnectKit.dispatch(myRequest)
+dependencies: [
+    .package(url: "https://github.com/your-username/DeclarativeConnectKit.git", .upToNextMajor(from: "1.0.0"))
+]
 ```
 
-또는 async/await 패턴을 사용할 수 있습니다. SwiftUI와 함께 사용 할 때는 이 방식을 추천 합니다.
+수동으로: 소스 파일을 다운로드하고 프로젝트에 포함시킵니다.
 
+### 요청 정의
+
+DCRequest 프로토콜을 준수하는 구조체를 생성합니다:
 ```swift
-let myRequest = MyRequest()
-let response: MyResponse = try await declarativeConnectKit.dispatch(myRequest)
+struct GetUsersRequest: DCRequest {
+    typealias ReturnType = [User]
+    
+    var path: String = "/users"
+}
 ```
 
-
-
-## 에러 처리
-
-`NetworkRequestError` 열거형을 사용하여 네트워크 요청 에러를 처리합니다. 각 케이스는 HTTP 상태 코드에 따른 에러를 나타냅니다.
-
-각 에러 상태에 대한 설명은 다음과 같습니다:
-
-- invalidRequest: 이 에러는 클라이언트가 잘못된 요청을 보냈을 때 발생합니다. 예를 들어, 요청에 필요한 매개변수가 누락되었거나, 요청 형식이 잘못된 경우에 이 에러가 발생할 수 있습니다.
-
-- badRequest: 이 에러는 서버가 클라이언트의 요청을 이해할 수 없을 때 발생합니다. 예를 들어, 요청의 구문이 잘못되었거나, 요청에 유효하지 않은 데이터가 포함되어 있는 경우에 이 에러가 발생할 수 있습니다.
-
-- unauthorized: 이 에러는 클라이언트가 인증되지 않았을 때 발생합니다. 예를 들어, 클라이언트가 잘못된 자격 증명을 제공하거나, 자격 증명을 전혀 제공하지 않은 경우에 이 에러가 발생할 수 있습니다.
-
-- forbidden: 이 에러는 클라이언트가 요청한 리소스에 대한 권한이 없을 때 발생합니다. 클라이언트가 인증되었지만, 해당 리소스에 접근할 권한이 없는 경우에 이 에러가 발생할 수 있습니다.
-
-- notFound: 이 에러는 클라이언트가 요청한 리소스를 서버에서 찾을 수 없을 때 발생합니다. 예를 들어, 클라이언트가 요청한 URL이 존재하지 않는 경우에 이 에러가 발생할 수 있습니다.
-
-- error4xx: 이 에러는 클라이언트의 요청이 잘못되었음을 나타내는 4xx HTTP 상태 코드를 나타냅니다. 이 범주에는 위에서 설명한 badRequest, unauthorized, forbidden, notFound 등이 포함됩니다.
-
-- serverError: 이 에러는 서버에서 문제가 발생했음을 나타냅니다. 서버가 요청을 처리하는 도중에 예상치 못한 오류가 발생한 경우에 이 에러가 발생할 수 있습니다.
-
-- serviceError: 이 에러는 서버에서 서비스 관련 문제가 발생했음을 나타냅니다. 예를 들어, 서버의 데이터베이스에 문제가 발생한 경우에 이 에러가 발생할 수 있습니다.
-
-- error5xx: 이 에러는 서버에서 문제가 발생했음을 나타내는 5xx HTTP 상태 코드를 나타냅니다. 이 범주에는 위에서 설명한 serverError, serviceError 등이 포함됩니다.
-
-- decodingError: 이 에러는 데이터를 디코딩하는 도중에 문제가 발생했음을 나타냅니다. 예를 들어, 서버에서 받은 응답을 앱이 이해할 수 있는 형식으로 변환하는 도중에 문제가 발생한 경우에 이 에러가 발생할 수 있습니다.
-
-- urlSessionFailed: 이 에러는 URL 세션 작업이 실패했음을 나타냅니다. 예를 들어, 네트워크 연결 문제나 기타 시스템 수준의 문제로 인해 URL 세션 작업이 완료되지 않은 경우에 이 에러가 발생할 수 있습니다.
-
-- unknownError: 이 에러는 알 수 없는 오류가 발생했음을 나타냅니다. 이 에러는 일반적으로 예상치 못한 상황이나 처리되지 않은 예외 상황에서 발생합니다.
-
-
-## 로깅
-
-`DCLogger` 클래스를 사용하여 네트워크 요청과 응답을 로깅합니다. 로깅 레벨은 `.off`, `.info`, `.debug` 중에서 선택할 수 있습니다.
-
-public struct DCDispatcher에서 로깅을 초기 화 할떄 레벨을 넣어주어야 합니가. 기본 설정은 .info입니다.
-
+(선택 사항) 요청 속성을 사용자 정의합니다:
 ```swift
-private let logger = DCLogger(logLevel: .info)
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var body: Params = ["title": "My Post", "content": "Hello world!"]
+}
+
+or 
+
+struct BodyParam: Encodable, CustomStringConvertible {
+	let title: String
+	let content: String
+
+	var description: String {
+		return "title: \(title), content: \(content)"
+	}
+}
+
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var body: Params = BodyParam(title: "My Post", content: "Hello, World").asParams()
+}
+
+
 ```
 
-.debug 레벨로 올렸을 경우 로그에서 curl형태로 확인 할 수 있는 명령어를 볼 수 있습니다.
+### 요청 보내기
+
+#### Combine 사용
+베이스 URL과 함께 DeclarativeConnectKit 인스턴스를 생성합니다:
+```swift
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+```
+
+요청과 함께 dispatch 메서드를 사용합니다:
+```swift
+connectKit.dispatch(GetUsersRequest())
+    .sink(receiveCompletion: { completion in
+        // 완료 처리 (완료되거나 실패)
+    }, receiveValue: { users in
+        // 받은 사용자 처리
+    })
+    .store(in: &cancell
+
+ables)
+```
+
+#### Async/Await 사용
+async dispatch 메서드를 사용합니다:
+```swift
+do {
+    let users = try await connectKit.dispatch(GetUsersRequest())
+    // 받은 사용자 처리
+} catch {
+    // 오류 처리
+}
+```
+
+#### 로깅
+DCLogger는 설정된 로그 수준을 기반으로 요청 및 응답을 자동으로 기록합니다. DeclarativeConnectKit 이니셜라이저에서 로그 수준을 조정할 수 있습니다:
+```swift
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+connectKit.logger.logLevel = .debug // 로그 수준을 디버그로 설정합니다.
+```
+
+## 예시
+
+다음은 사용자 목록을 가져오고 새 게시물을 만드는 방법을 보여주는 더 완벽한 예시입니다:
+```swift
+// 사용자 모델
+struct User: Codable {
+    let id: Int
+    let name: String
+}
+
+// 게시물 모델
+struct Post: Codable {
+    let id: Int
+    let title: String
+    let content: String
+}
+
+// 사용자 목록 가져오기 요청
+struct GetUsersRequest: DCRequest {
+    typealias ReturnType = [User]
+    
+    var path: String = "/users"
+}
+
+// 게시물 만들기 요청
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var body: Params
+    
+    init(title: String, content: String) {
+        self.body = ["title": title, "content": content]
+    }
+}
+
+// 사용법
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+
+// Combine을 사용하여 사용자 가져오기
+connectKit.dispatch(GetUsersRequest())
+    .sink(receiveCompletion: { completion in
+        // 완료 처리
+    }, receiveValue: { users in
+        // 사용자 처리
+        print("받은 사용자: \(users)")
+    })
+    .store(in: &cancellables)
+
+// Async/Await을 사용하여 게시물 만들기
+do {
+    let newPost = try await connectKit.dispatch(CreatePostRequest(title: "새 게시물", content: "이것은 새 게시물입니다!"))
+    print("생성된 게시물: \(newPost)")
+} catch {
+    print("게시물 생성 오류: \(error)")
+}
+```
+
+## 오류 처리
+
+네트워크 요청 오류는 `NetworkRequestError` 열거형을 사용하여 처리합니다. 각 case는 HTTP 상태 코드에 따른 오류를 나타냅니다. 아래는 각 오류 상태에 대한 설명입니다:
+
+- invalidRequest: 클라이언트가 잘못된 요청을 보낼 때 발생하는 오류입니다. 예를 들어, 요청에 필요한 매개변수가 누락되었거나 요청 형식이 잘못된 경우에 발생할 수 있습니다.
+
+- badRequest: 서버가 클라이언트의 요청을 이해할 수 없는 경우 발생하는 오류입니다. 예를 들어, 요청의 구문이 잘못되었거나 요청에 유효하지 않은 데이터가 포함된 경우에 발생할 수 있습니다.
+
+- unauthorized: 클라이언트가 인증되지 않은 경우 발생하는 오류입니다. 예를 들어, 클라이언트가 잘못된 자격 증명을 제공하거나 전혀 자격 증명을 제공하지 않은 경우에 발생할 수 있습니다.
+
+- forbidden: 클라이언트가 요청한 리소스에 대한 권한이 없는 경우 발생하는 오류입니다. 예를 들어, 클라이언트가 인증되었지만 리소스에 액세스할 수 있는 권한이 없는 경우에 발생할 수 있습니다.
+
+- notFound: 서버가 클라이언트가 요청한 리소스를 찾을 수 없는 경우 발생하는 오류입니다. 예를 들어, 클라이언트가 요청한 URL이 존재하지 않는 경우에 발생할 수 있습니다.
+
+- error4xx: 클라이언트의 요청이 잘못된 경우를 나타내는 4xx HTTP 상태 코드의 오류입니다. 이 카테고리에는 위에서 설명한 badRequest, unauthorized, forbidden, notFound 등이 포함됩니다.
+
+- serverError: 서버에서 문제가 발생한 경우 발생하는 오류입니다. 예를 들어, 서버가 요청을 처리하는 동안 예기치 않은 오류가 발생한 경우에 발생할 수 있습니다.
+
+- serviceError: 서버와 관련된 서비스 문제가 발생한 경우 발생하는 오류입니다. 예를 들어, 서버의 데이터베이스에 문제가 있는 경우 발생할 수 있습니다.
+
+- error5xx: 서버에서 문제가 발생한 것을 나타내는 5xx HTTP 상태 코드의 오류입니다. 이 카테고리에는 위에서 설명한 serverError, serviceError 등이 포함됩니다.
+
+- decodingError: 데이터를 디코딩하는 동안 문제가 발생한 경우 발생하는 오류입니다. 예를 들어, 서버의 응답을 앱이 이해할 수 있는 형식으로 변환하는 동안 문제가 발생하는 경우에 발생할 수 있습니다.
+
+- urlSessionFailed: URL 세션 작업이 실패한 경우 발생하는 오류입니다. 예를 들어, 네트워크 연결 문제나 다른 시스템 수준의 문제로 인해 URL 세션 작업이 완료되지 않는 경우에 발생할 수 있습니다.
+
+- unknownError: 알 수 없는 오류가 발생한 경우입니다. 이 오류는 일반적으로 예상치 못한 상황이나 처리되지 않은 예외 상황에서 발생합니다.
+
+
+# ???
+
+ 버그를 찾거나 궁금증이 있으면 메세지 남겨 주세요. 
