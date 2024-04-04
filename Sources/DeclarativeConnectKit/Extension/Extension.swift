@@ -12,6 +12,21 @@ public extension Encodable {
         guard let dictionary: [String : Any] = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] else { return [:] }
         return dictionary
     }
+	
+	func asParams() -> Params {
+		guard let data = try? JSONEncoder().encode(self),
+			  let dictionary = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] else {
+			return [:]
+		}
+		
+		return dictionary.mapValues { value -> CustomStringConvertible in
+			if let convertible = value as? CustomStringConvertible {
+				return convertible
+			} else {
+				return "\(value)" // Convert to string if not already convertible
+			}
+		}
+	}
 }
 
 // Decodable 프로토콜을 확장하여 fromDictionary라는 함수를 추가합니다.
