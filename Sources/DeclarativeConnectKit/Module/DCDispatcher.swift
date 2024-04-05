@@ -59,22 +59,6 @@ public struct DCDispatcher {
         // async/await를 사용하여 데이터를 가져옴
         let (data, urlResponse) = try await urlSession.data(for: request)
 		
-		#if DEBUG
-		do {
-			let response = try JSONDecoder().decode(ReturnType.self, from: data) // Specify ReturnType.self
-		} catch let DecodingError.dataCorrupted(context) {
-			print("Data corrupted: \(context)")
-		} catch let DecodingError.keyNotFound(key, context) {
-			print("Key '\(key)' not found: \(context.debugDescription), codingPath: \(context.codingPath)")
-		} catch let DecodingError.valueNotFound(value, context) {
-			print("Value '\(value)' not found: \(context.debugDescription), codingPath: \(context.codingPath)")
-		} catch let DecodingError.typeMismatch(type, context) {
-			print("Type '\(type)' mismatch: \(context.debugDescription), codingPath: \(context.codingPath)")
-		} catch {
-			print("Other decoding error: \(error)")
-		}
-		#endif
-		
         // HTTPURLResponse로 캐스팅
         guard let HTTPResponse = urlResponse as? HTTPURLResponse else {
             throw NetworkRequestError.unknownError(data)
@@ -88,6 +72,22 @@ public struct DCDispatcher {
         // 로그 출력
         self.logger.log(response: urlResponse, data: data)
         
+#if DEBUG
+		do {
+			let response = try JSONDecoder().decode(ReturnType.self, from: data) // Specify ReturnType.self
+		} catch let DecodingError.dataCorrupted(context) {
+			print("Data corrupted: \(context)")
+		} catch let DecodingError.keyNotFound(key, context) {
+			print("Key '\(key)' not found: \(context.debugDescription), codingPath: \(context.codingPath)")
+		} catch let DecodingError.valueNotFound(value, context) {
+			print("Value '\(value)' not found: \(context.debugDescription), codingPath: \(context.codingPath)")
+		} catch let DecodingError.typeMismatch(type, context) {
+			print("Type '\(type)' mismatch: \(context.debugDescription), codingPath: \(context.codingPath)")
+		} catch {
+			print("Other decoding error: \(error)")
+		}
+#endif
+		
         // JSON 디코딩
         let response = try decoder.decode(ReturnType.self, from: data)
         return response
