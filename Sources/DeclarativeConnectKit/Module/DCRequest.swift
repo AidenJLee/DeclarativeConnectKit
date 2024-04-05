@@ -39,10 +39,14 @@ extension DCRequest {
         let boundary = UUID().uuidString // Multipart Data를 위한 boundary 생성
         
         var request = URLRequest(url: finalURL) // URLRequest 생성
-        let defaultHeaders: HTTPHeaders = [
-            HTTPHeaderField.contentType.rawValue: "\(contentType.rawValue); boundary=\(boundary)" // Content-Type과 boundary 추가
-        ]
-        request.allHTTPHeaderFields = defaultHeaders.merging(headers ?? [:], uniquingKeysWith: { (current, _) in current }) // HTTP Header 추가
+		request.setValue("\(contentType.rawValue); boundary=\(boundary)", forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
+		
+		// 헤더 추가
+		if let headers = headers {
+			for (key, value) in headers {
+				request.setValue(value, forHTTPHeaderField: key)
+			}
+		}
         request.httpMethod = method.rawValue // HTTP 메소드 설정
         request.httpBody = requestBodyFrom(params: body, boundary: boundary) // Request Body 설정
         return request
