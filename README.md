@@ -54,9 +54,11 @@ struct MyRequest: DCRequest {
 ### Installation
 
 Swift Package Manager: Add the following to your Package.swift file:
+```swift
 dependencies: [
     .package(url: "https://github.com/your-username/DeclarativeConnectKit.git", .upToNextMajor(from: "1.0.0"))
 ]
+```
 
 Manually: Download the source files and include them in your project.
 
