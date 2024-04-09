@@ -56,7 +56,7 @@ struct MyRequest: DCRequest {
 Swift Package Manager: Add the following to your Package.swift file:
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-username/DeclarativeConnectKit.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/your-username/.git", .upToNextMajor(from: "1.0.0"))
 ]
 ```
 
@@ -96,10 +96,10 @@ extension NoticeData {
 
 ### Making Requests
 
-Create a DeclarativeConnectKit instance with your base URL:
+Create a  instance with your base URL:
 
 ```swift
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 ```
 
 #### Using Async/Await
@@ -130,10 +130,10 @@ connectKit.dispatch(NoticeLists.Request())
 
 
 #### Logging
-The DCLogger automatically logs requests and responses based on the configured log level. You can adjust the log level in the DeclarativeConnectKit initializer:
+The DCLogger automatically logs requests and responses based on the configured log level. You can adjust the log level in the  initializer:
 
 ```swift
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 connectKit.logger.logLevel = .debug // Set log level to debug
 ```
 
@@ -179,7 +179,7 @@ struct CreatePostRequest: DCRequest {
 }
 
 // Usage
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 
 // Create a post using async/await
 do {
@@ -377,7 +377,7 @@ do {
 #### Combine 사용
 베이스 URL과 함께 DeclarativeConnectKit 인스턴스를 생성합니다:
 ```swift
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 ```
 
 요청과 함께 dispatch 메서드를 사용합니다:
@@ -397,7 +397,7 @@ ables)
 #### 로깅
 DCLogger는 설정된 로그 수준을 기반으로 요청 및 응답을 자동으로 기록합니다. DeclarativeConnectKit 이니셜라이저에서 로그 수준을 조정할 수 있습니다:
 ```swift
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 connectKit.logger.logLevel = .debug // 로그 수준을 디버그로 설정합니다.
 ```
 
@@ -439,7 +439,7 @@ struct CreatePostRequest: DCRequest {
 }
 
 // 사용법
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 
 // Combine을 사용하여 사용자 가져오기
 connectKit.dispatch(GetUsersRequest())
@@ -497,7 +497,7 @@ struct CreatePostRequest: DCRequest {
 }
 
 // Usage
-let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+let connectKit = DConnectKit(baseURL: "https://api.example.com")
 
 // Async/Await을 사용하여 게시물 만들기
 do {
