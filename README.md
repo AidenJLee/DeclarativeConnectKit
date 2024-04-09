@@ -86,7 +86,7 @@ struct NoticeModel: Codable {
 
 extension NoticeData {
 	struct Request: DCRequest {
-		typealias ReturnType = APIResponse<NoticeData>
+		typealias ReturnType = NoticeLists
 		
 		let path = "/v1/api/app/contents/Notice"
 		let method = .get
@@ -353,7 +353,7 @@ struct NoticeModel: Codable {
 
 extension NoticeData {
 	struct Request: DCRequest {
-		typealias ReturnType = APIResponse<NoticeData>
+		typealias ReturnType = NoticeLists
 		
 		let path = "/v1/api/app/contents/Notice"
 		let method = .get
