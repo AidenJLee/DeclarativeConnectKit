@@ -63,64 +63,62 @@ dependencies: [
 Manually: Download the source files and include them in your project.
 
 
-### Defining Requests
+### Defining Model&Requests
 
 Create a struct conforming to the DCRequest protocol:
 
 ```swift
-struct GetUsersRequest: DCRequest {
-    typealias ReturnType = [User]
-    
-    var path: String = "/users"
-}
-```
-
-(Optional) Customize request properties:
-
-```swift
-struct CreatePostRequest: DCRequest {
-    typealias ReturnType = Post
-    
-    var path: String = "/posts"
-    var method: HTTPMethod = .post
-    var body: Params = ["title": "My Post", "content": "Hello world!"]
+// MARK: - DataClass
+struct NoticeLists: Codable {
+	let noticeList: [NoticeModel]
 }
 
+// MARK: - Notice
+struct NoticeModel: Codable {
+	let noticeSeq: String
+	let noticeTitle: String
+	let createtime: String
 
-or 
-
-struct BodyParam: Encodable, CustomStringConvertible {
-	let title: String
-	let content: String
-
-	var description: String {
-		return "title: \(title), content: \(content)"
+	enum CodingKeys: String, CodingKey {
+		case noticeSeq, noticeTitle, createtime
 	}
 }
 
-struct CreatePostRequest: DCRequest {
-    typealias ReturnType = Post
-    
-    var path: String = "/posts"
-    var method: HTTPMethod = .post
-    var body: Params = BodyParam(title: "My Post", content: "Hello, World").asParams()
+extension NoticeData {
+	struct Request: DCRequest {
+		typealias ReturnType = APIResponse<NoticeData>
+		
+		let path = "/v1/api/app/contents/Notice"
+		let method = .get
+	}
 }
-
-
 ```
 
 ### Making Requests
 
-#### Using Combine
 Create a DeclarativeConnectKit instance with your base URL:
 
 ```swift
 let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
 ```
 
+#### Using Async/Await
+Use the async dispatch method:
+```swift
+do {
+    let users = try await connectKit.dispatch(NoticeLists.Request())
+    // Process the received users
+} catch {
+    // Handle errors
+}
+```
+
+#### Using Combine
+
+
 Use the dispatch method with your request:
 ```swift
-connectKit.dispatch(GetUsersRequest())
+connectKit.dispatch(NoticeLists.Request())
     .sink(receiveCompletion: { completion in
         // Handle completion (finished or failed)
     }, receiveValue: { users in
@@ -129,16 +127,7 @@ connectKit.dispatch(GetUsersRequest())
     .store(in: &cancellables)
 ```
 
-#### Using Async/Await
-Use the async dispatch method:
-```swift
-do {
-    let users = try await connectKit.dispatch(GetUsersRequest())
-    // Process the received users
-} catch {
-    // Handle errors
-}
-```
+
 
 #### Logging
 The DCLogger automatically logs requests and responses based on the configured log level. You can adjust the log level in the DeclarativeConnectKit initializer:
@@ -179,15 +168,26 @@ struct CreatePostRequest: DCRequest {
     
     var path: String = "/posts"
     var method: HTTPMethod = .post
-    var body: Params
-    
-    init(title: String, content: String) {
-        self.body = ["title": title, "content": content]
-    }
+    var header = ["Authorization" : "some auth key"
+    var body: Params? =  [ "someBodyData" :
+					[
+						"siteType": "MA",
+						"langCode" : "ko-KR""
+					],
+				 "osType" : "IOS"
+		]
 }
 
 // Usage
 let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+
+// Create a post using async/await
+do {
+    let newPost = try await connectKit.dispatch(CreatePostRequest(title: "New Post", content: "This is a new post!"))
+    print("Created post: \(newPost)")
+} catch {
+    print("Error creating post: \(error)")
+}
 
 // Fetch users using Combine
 connectKit.dispatch(GetUsersRequest())
@@ -198,15 +198,44 @@ connectKit.dispatch(GetUsersRequest())
         print("Received users: \(users)")
     })
     .store(in: &cancellables)
+```
 
-// Create a post using async/await
-do {
-    let newPost = try await connectKit.dispatch(CreatePostRequest(title: "New Post", content: "This is a new post!"))
-    print("Created post: \(newPost)")
-} catch {
-    print("Error creating post: \(error)")
+
+// add Body 'asParam'
+```swift
+struct BodyParam: Encodable, CustomStringConvertible {
+
+let title: String
+
+let content: String
+
+  
+
+var description: String {
+
+return "title: \(title), content: \(content)"
+
+}
+
+}
+
+  
+
+struct CreatePostRequest: DCRequest {
+
+    typealias ReturnType = Post
+
+    var path: String = "/posts"
+
+    var method: HTTPMethod = .post
+
+    var body: Params = BodyParam(title: "My Post", content: "Hello, World").asParams()
+
 }
 ```
+  
+
+  
 
 
 ## Error Handling
@@ -306,46 +335,44 @@ dependencies: [
 
 DCRequest 프로토콜을 준수하는 구조체를 생성합니다:
 ```swift
-struct GetUsersRequest: DCRequest {
-    typealias ReturnType = [User]
-    
-    var path: String = "/users"
-}
-```
-
-(선택 사항) 요청 속성을 사용자 정의합니다:
-```swift
-struct CreatePostRequest: DCRequest {
-    typealias ReturnType = Post
-    
-    var path: String = "/posts"
-    var method: HTTPMethod = .post
-    var body: Params = ["title": "My Post", "content": "Hello world!"]
+// MARK: - DataClass
+struct NoticeLists: Codable {
+	let noticeList: [NoticeModel]
 }
 
-or 
+// MARK: - Notice
+struct NoticeModel: Codable {
+	let noticeSeq: String
+	let noticeTitle: String
+	let createtime: String
 
-struct BodyParam: Encodable, CustomStringConvertible {
-	let title: String
-	let content: String
-
-	var description: String {
-		return "title: \(title), content: \(content)"
+	enum CodingKeys: String, CodingKey {
+		case noticeSeq, noticeTitle, createtime
 	}
 }
 
-struct CreatePostRequest: DCRequest {
-    typealias ReturnType = Post
-    
-    var path: String = "/posts"
-    var method: HTTPMethod = .post
-    var body: Params = BodyParam(title: "My Post", content: "Hello, World").asParams()
+extension NoticeData {
+	struct Request: DCRequest {
+		typealias ReturnType = APIResponse<NoticeData>
+		
+		let path = "/v1/api/app/contents/Notice"
+		let method = .get
+	}
 }
-
-
 ```
 
 ### 요청 보내기
+
+#### Async/Await 사용
+async dispatch 메서드를 사용합니다:
+```swift
+do {
+    let users = try await connectKit.dispatch(NoticeLists.Request())
+    // Process the received users
+} catch {
+    // Handle errors
+}
+```
 
 #### Combine 사용
 베이스 URL과 함께 DeclarativeConnectKit 인스턴스를 생성합니다:
@@ -355,7 +382,7 @@ let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
 
 요청과 함께 dispatch 메서드를 사용합니다:
 ```swift
-connectKit.dispatch(GetUsersRequest())
+connectKit.dispatch(NoticeLists.Request())
     .sink(receiveCompletion: { completion in
         // 완료 처리 (완료되거나 실패)
     }, receiveValue: { users in
@@ -366,16 +393,6 @@ connectKit.dispatch(GetUsersRequest())
 ables)
 ```
 
-#### Async/Await 사용
-async dispatch 메서드를 사용합니다:
-```swift
-do {
-    let users = try await connectKit.dispatch(GetUsersRequest())
-    // 받은 사용자 처리
-} catch {
-    // 오류 처리
-}
-```
 
 #### 로깅
 DCLogger는 설정된 로그 수준을 기반으로 요청 및 응답을 자동으로 기록합니다. DeclarativeConnectKit 이니셜라이저에서 로그 수준을 조정할 수 있습니다:
@@ -440,6 +457,98 @@ do {
     print("생성된 게시물: \(newPost)")
 } catch {
     print("게시물 생성 오류: \(error)")
+}
+```
+```swift
+// 사용자 모델
+struct User: Codable {
+    let id: Int
+    let name: String
+}
+
+// 게시물 모델
+struct Post: Codable {
+    let id: Int
+    let title: String
+    let content: String
+}
+
+// 사용자 목록 가져오기 요청
+struct GetUsersRequest: DCRequest {
+    typealias ReturnType = [User]
+    
+    var path: String = "/users"
+}
+
+// 게시물 만들기 요청
+struct CreatePostRequest: DCRequest {
+    typealias ReturnType = Post
+    
+    var path: String = "/posts"
+    var method: HTTPMethod = .post
+    var header = ["Authorization" : "some auth key"
+    var body: Params? =  [ "someBodyData" :
+					[
+						"siteType": "MA",
+						"langCode" : "ko-KR""
+					],
+				 "osType" : "IOS"
+		]
+}
+
+// Usage
+let connectKit = DeclarativeConnectKit(baseURL: "https://api.example.com")
+
+// Async/Await을 사용하여 게시물 만들기
+do {
+    let newPost = try await connectKit.dispatch(CreatePostRequest(title: "New Post", content: "This is a new post!"))
+    print("Created post: \(newPost)")
+} catch {
+    print("Error creating post: \(error)")
+}
+
+// Combine을 사용하여 사용자 가져오기
+connectKit.dispatch(GetUsersRequest())
+    .sink(receiveCompletion: { completion in
+        // Handle completion
+    }, receiveValue: { users in
+        // Process users
+        print("Received users: \(users)")
+    })
+    .store(in: &cancellables)
+```
+
+
+// 데이터 정의 후 asParam으로 추가하기 
+```swift
+struct BodyParam: Encodable, CustomStringConvertible {
+
+let title: String
+
+let content: String
+
+  
+
+var description: String {
+
+return "title: \(title), content: \(content)"
+
+}
+
+}
+
+  
+
+struct CreatePostRequest: DCRequest {
+
+    typealias ReturnType = Post
+
+    var path: String = "/posts"
+
+    var method: HTTPMethod = .post
+
+    var body: Params = BodyParam(title: "My Post", content: "Hello, World").asParams()
+
 }
 ```
 

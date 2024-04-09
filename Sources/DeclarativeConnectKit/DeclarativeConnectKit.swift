@@ -5,7 +5,7 @@ import Combine
 import Foundation
 
 @available(iOS 15, macOS 10.15, *)
-public struct DeclarativeConnectKit {
+public struct DConnectKit {
 	public var baseURL: String
 	public var dispatcher: DCDispatcher = DCDispatcher()
 	

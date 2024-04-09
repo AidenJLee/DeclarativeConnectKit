@@ -1,14 +1,3 @@
-// |이 코드는 네트워크 로그를 출력하는 클래스인 `DCLogger`와 URLRequest를 cURL 명령어로 변환하는 URLRequest의 확장(extension)이 포함된 파일입니다.
-// |
-// |좋은 점:
-// |- `DCLogger` 클래스는 로그 레벨을 설정할 수 있어서 필요한 정보만 출력할 수 있습니다.
-// |- `log(request:)` 함수에서 HTTP 메소드와 URL, 헤더, 바디 등 HTTP 요청 정보를 출력합니다.
-// |- `log(response:data:)` 함수에서 HTTP 응답 코드와 URL, 응답 데이터를 출력합니다.
-// |- `URLRequest`의 `toCurlCommand()` 함수는 해당 요청을 cURL 명령어로 변환하여 출력할 수 있습니다.
-// |
-// |아쉬운 점:
-// |- `log(request:)` 함수에서 HTTP 요청 바디를 출력할 때, 바디가 JSON 형식이 아닌 경우에는 출력하지 않습니다. 이 경우에도 바디를 출력할 수 있도록 개선할 수 있습니다.
-// |- `log(response:data:)` 함수에서 JSON 데이터를 출력할 때, `JSONSerialization`의 `jsonObject(with:options:)` 메소드를 사용하고 있습니다. 이 메소드는 JSON 데이터가 유효하지 않은 경우에 예외를 발생시키므로, 예외 처리를 추가하는 것이 좋습니다. 또한, JSON 데이터가 아닌 경우에 대한 처리도 추가하는 것이 좋습니다.
 // |
 //  Created by AidenJLee on 2023/03/25.
 //
