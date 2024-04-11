@@ -7,12 +7,16 @@ import Foundation
 @available(iOS 15, macOS 10.15, *)
 public struct DConnectKit {
 	public var baseURL: String
-	public var dispatcher: DCDispatcher = DCDispatcher()
+	public var dispatcher: DCDispatcher
 	
-	private let logger: DCLogger = DCLogger(logLevel: .debug)
+	var logLevel: NetworkingLogLevel
+	private let logger: DCLogger
 	
-	public init(baseURL: String) {
+	public init(baseURL: String, logLevel: NetworkingLogLevel = .debug) {
 		self.baseURL = baseURL
+		self.logLevel = logLevel
+		self.logger = DCLogger(logLevel: logLevel)
+		self.dispatcher = DCDispatcher(logger: logger)
 	}
 	
 	public func dispatch<Request: DCRequest>(_ request: Request) -> AnyPublisher<Request.ReturnType, NetworkRequestError> {

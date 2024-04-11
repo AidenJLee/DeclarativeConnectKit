@@ -9,14 +9,11 @@ public struct DCDispatcher {
 	
 	let urlSession: URLSession = .shared
 	
-	var logLevel: NetworkingLogLevel
-	
 	// 로그를 위한 DCLogger 인스턴스 생성
 	private let logger: DCLogger
 	
-	init(logLevel: NetworkingLogLevel = .info) {
-		self.logger = DCLogger(logLevel: logLevel)
-		self.logLevel = logLevel
+	init(logger: DCLogger) {
+		self.logger = logger
 	}
 	
 	// Publisher를 반환하는 dispatch 메서드
