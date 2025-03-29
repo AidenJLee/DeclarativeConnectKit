@@ -84,7 +84,7 @@ struct NoticeModel: Codable {
 	}
 }
 
-extension NoticeData {
+extension NoticeModel {
 	struct Request: DCRequest {
 		typealias ReturnType = NoticeLists
 		
